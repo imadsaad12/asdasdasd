@@ -1,41 +1,47 @@
 #!/bin/bash
 
-# Prompt user for the target domain
-read -p "Enter the target domain: " TARGET
-
-# Check if the domain is provided
-if [ -z "$TARGET" ]; then
-    echo "Error: No domain provided. Exiting."
-    exit 1
+# Check if the input file is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <domain_file>"
+  exit 1
 fi
 
-# Define output directory
-OUTPUT_DIR="./recon"
-mkdir -p "$OUTPUT_DIR"
+# Input file containing domains
+domain_file="$1"
+output_file="all_subdomains.txt"
 
-# Subdomain Enumeration with subfinder
-echo "[*] Starting Subdomain Enumeration with subfinder..."
-subfinder -d "$TARGET" -o "$OUTPUT_DIR/subfinder_subdomains.txt"
+# Ensure the output file is empty before starting
+> "$output_file"
 
-# Subdomain Enumeration with bbot
-echo "[*] Starting Subdomain Enumeration with bbot..."
-BBOT_OUTPUT_DIR="./bbot_output"
-bbot -t "$TARGET" -f subdomain-enum -o "$BBOT_OUTPUT_DIR"
+# Iterate through each domain in the input file
+while IFS= read -r domain; do
+  # Skip empty lines or invalid domains
+  domain=$(echo "$domain" | xargs)  # Remove leading/trailing whitespace
+  if [[ -z "$domain" || ! "$domain" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+    continue
+  fi
 
-# Copy subdomains.txt to the desired output directory
-cp "$BBOT_OUTPUT_DIR/abnormal_susan/subdomains.txt" "$OUTPUT_DIR/bbot_subdomains.txt"
+  echo "Running subdomain enumeration for $domain..."
 
-# Subdomain Enumeration with assetfinder
-echo "[*] Starting Subdomain Enumeration with assetfinder..."
-assetfinder --subs-only "$TARGET" > "$OUTPUT_DIR/assetfinder_subdomains.txt"
+  # Run Amass
+  amass enum -d "$domain" -o temp_subdomains.txt
+  cat temp_subdomains.txt >> "$output_file"
 
-# Subdomain Enumeration with findomain
-echo "[*] Starting Subdomain Enumeration with findomain..."
-findomain -t "$TARGET" -u "$OUTPUT_DIR/findomain_subdomains.txt"
+  # Run Subfinder
+  subfinder -d "$domain" -o temp_subdomains.txt
+  cat temp_subdomains.txt >> "$output_file"
 
-# Combining subdomain results from all tools
-echo "[*] Combining subdomain results..."
-cat "$OUTPUT_DIR"/*.txt | sort -u > "$OUTPUT_DIR/all_subdomains.txt"
+  # Run Findomain
+  findomain --target "$domain" -o temp_subdomains.txt
+  cat temp_subdomains.txt >> "$output_file"
 
-echo "[*] Subdomain enumeration completed. Results saved in $OUTPUT_DIR/all_subdomains.txt"
+  # Clear the temporary file after each domain
+  rm temp_subdomains.txt
+
+done < "$domain_file"
+
+# Remove duplicates and sort the output file
+sort -u "$output_file" -o "$output_file"
+
+echo "Subdomain enumeration complete. Results saved in $output_file."
 
