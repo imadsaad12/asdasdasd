@@ -15,16 +15,11 @@ output_file="all_subdomains.txt"
 
 # Iterate through each domain in the input file
 while IFS= read -r domain; do
-  # Skip empty lines or invalid domains
-  domain=$(echo "$domain" | xargs)  # Remove leading/trailing whitespace
-  if [[ -z "$domain" || ! "$domain" =~ ^[a-zA-Z0-9.-]+$ ]]; then
-    continue
-  fi
 
   echo "Running subdomain enumeration for $domain..."
 
   # Run Amass
-  amass enum -d "$domain" -o temp_subdomains.txt
+  amass enum -passive -d "$domain" -o temp_subdomains.txt
   cat temp_subdomains.txt >> "$output_file"
 
   # Run Subfinder
@@ -32,7 +27,7 @@ while IFS= read -r domain; do
   cat temp_subdomains.txt >> "$output_file"
 
   # Run Findomain
-  findomain --target "$domain" -o temp_subdomains.txt
+  findomain -t "$domain" -u temp_subdomains.txt
   cat temp_subdomains.txt >> "$output_file"
 
   # Clear the temporary file after each domain
@@ -44,4 +39,3 @@ done < "$domain_file"
 sort -u "$output_file" -o "$output_file"
 
 echo "Subdomain enumeration complete. Results saved in $output_file."
-
