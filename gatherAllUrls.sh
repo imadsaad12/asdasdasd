@@ -17,7 +17,7 @@
 # fi
 
 # Input file
-SUBDOMAIN_FILE="subdomains.txt"
+SUBDOMAIN_FILE="httpx.txt"
 OUTPUT_FILE="all_urls.txt"
 
 # Check if the subdomain file exists
@@ -40,9 +40,9 @@ gather_urls() {
     # rm katana_urls.txt
 
     # Run GAU
-    gau "$subdomain" > gau_urls.txt
-    cat gau_urls.txt >> $OUTPUT_FILE
-    rm gau_urls.txt
+   # gau "$subdomain" > gau_urls.txt
+    #cat gau_urls.txt >> $OUTPUT_FILE
+    #rm gau_urls.txt
 
     # Run WaybackURLs
     echo "$subdomain" | waybackurls > wayback_urls.txt

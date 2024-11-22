@@ -13,6 +13,7 @@ output_file="all_subdomains.txt"
 # Ensure the output file is empty before starting
 > "$output_file"
 
+#   bbot -t "$domain_file"  -f subdomain-enum -o .
 # Iterate through each domain in the input file
 while IFS= read -r domain; do
 
