@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Ensure required tools are installed
+if ! command -v waybackurls &> /dev/null; then
+    echo "Waybackurls could not be found. Please install Waybackurls to proceed."
+    exit 1
+fi
+
+if ! command -v kxss &> /dev/null; then
+    echo "KXSS could not be found. Please install KXSS to proceed."
+    exit 1
+fi
+
+# Input file
+SUBDOMAIN_FILE="httpx.txt"
+OUTPUT_FILE="all_urls.txt"
+FILTERED_FILE="filtered_urls.txt"
+XSS_FILE="reflectedxss.txt"
+
+# Check if the subdomain file exists
+if [ ! -f "$SUBDOMAIN_FILE" ]; then
+    echo "Subdomain file $SUBDOMAIN_FILE not found!"
+#!/bin/bash
+
+# Ensure required tools are installed
+if ! command -v waybackurls &> /dev/null; then
+    echo "Waybackurls could not be found. Please install Waybackurls to proceed."
+    exit 1
+fi
+
+if ! command -v kxss &> /dev/null; then
+    echo "KXSS could not be found. Please install KXSS to proceed."
+    exit 1
+fi
+
+# Input file
+SUBDOMAIN_FILE="httpx.txt"
+OUTPUT_FILE="all_urls.txt"
+FILTERED_FILE="filtered_urls.txt"
+XSS_FILE="reflectedxss.txt"
+
+# Check if the subdomain file exists
+if [ ! -f "$SUBDOMAIN_FILE" ]; then
+    echo "Subdomain file $SUBDOMAIN_FILE not found!"
+    exit 1
+fi
+
+# Initialize or clear the output files
+> "$OUTPUT_FILE"
+> "$FILTERED_FILE"
+> "$XSS_FILE"
+
+# Function to gather URLs using WaybackURLs
+gather_urls() {
+    local subdomain=$1
+    echo "Gathering URLs for: $subdomain"
+    
+    # Run WaybackURLs and append to the output file
+    echo "$subdomain" | waybackurls >> "$OUTPUT_FILE"
+}
+
+# Run the function for each subdomain
+while IFS= read -r subdomain; do
+    gather_urls "$subdomain"
+done < "$SUBDOMAIN_FILE"
+
+# Remove duplicate URLs
+sort -u "$OUTPUT_FILE" -o "$OUTPUT_FILE"
+
+# Filter URLs containing "?" and save to the filtered file
+grep "?" "$OUTPUT_FILE" > "$FILTERED_FILE"
+
+# Pass filtered URLs to kxss and save output to the XSS file
+kxss < "$FILTERED_FILE" > "$XSS_FILE"
+
+echo "[*] URL gathering and filtering completed."
+echo "[*] All URLs saved in $OUTPUT_FILE."
+echo "[*] Filtered URLs (with '?') saved in $FILTERED_FILE."
+echo "[*] Reflected XSS results saved in $XSS_FILE."
+    exit 1
+fi
+
+# Initialize or clear the output files
+> "$OUTPUT_FILE"
+> "$FILTERED_FILE"
+> "$XSS_FILE"
+
+# Function to gather URLs using WaybackURLs
+gather_urls() {
+    local subdomain=$1
+    echo "Gathering URLs for: $subdomain"
+    
+    # Run WaybackURLs and append to the output file
+    echo "$subdomain" | waybackurls >> "$OUTPUT_FILE"
+}
+
+# Run the function for each subdomain
+while IFS= read -r subdomain; do
+    gather_urls "$subdomain"
+done < "$SUBDOMAIN_FILE"
+
+# Remove duplicate URLs
+sort -u "$OUTPUT_FILE" -o "$OUTPUT_FILE"
+
+# Filter URLs containing "?" and save to the filtered file
+grep "?" "$OUTPUT_FILE" > "$FILTERED_FILE"
+
+# Pass filtered URLs to kxss and save output to the XSS file
+kxss < "$FILTERED_FILE" > "$XSS_FILE"
+
+echo "[*] URL gathering and filtering completed."
+echo "[*] All URLs saved in $OUTPUT_FILE."
+echo "[*] Filtered URLs (with '?') saved in $FILTERED_FILE."
+echo "[*] Reflected XSS results saved in $XSS_FILE."

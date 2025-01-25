@@ -17,7 +17,7 @@
 # fi
 
 # Input file
-SUBDOMAIN_FILE="httpx.txt"
+SUBDOMAIN_FILE="clear-httpx.txt"
 OUTPUT_FILE="all_urls.txt"
 
 # Check if the subdomain file exists
